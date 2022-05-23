@@ -1,0 +1,41 @@
+---
+- hosts: all
+  gather_facts: true
+  become: yes
+
+  vars:
+    grant_sudo: ttest
+
+  tasks:
+    - name: add user id
+      shell: |
+        mkdir -p /var/local/adm/
+        echo "{{grant_sudo}}" >> /var/local/adm/users"
+    
+    - name: Clone a github repository
+      git:
+        repo: https://github.com/yommy-fakorede/ansible-test.git
+        dest: /var/local/adm/
+        clone: yes
+        update: yes
+
+    - name: Execute script
+      command: sh add_ldap_users.sh
+      args:
+        chdir: /var/local/adm/
+
+    - name: grant sudo access to user
+      shell: "usermod -aG sudo {{grant_sudo}}"
+      ignore_errors: true
+      when: ansible_os_family == "Debian"
+
+    - name: grant sudo access to user
+      shell: "usermod -aG wheel {{grant_sudo}}"
+      ignore_errors: true
+      when: ansible_os_family == "RedHat"
+
+    - name: grant sudo access to user
+      shell: "usermod -aG wheel {{grant_sudo}}"
+      ignore_errors: true
+      when:
+        - ansible_distribution == "CentOS"
