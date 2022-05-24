@@ -16,10 +16,9 @@
         mode: '0755'
         
     - name: Touch a file
-      file:
+      ansible.builtin.file:
         path: /var/local/adm/users
         state: touch
-        mode: '0755'
 
     - name: Run a script with arguments (using 'cmd' parameter)
       command: /bin/bash -c "echo "{{ grant_sudo }}" >> /var/local/adm/users"
