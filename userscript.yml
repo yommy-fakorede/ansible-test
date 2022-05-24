@@ -2,6 +2,8 @@
 - hosts: ping-2
   gather_facts: true
   become: true
+  become_method: sudo
+  become_user: mpm-ansible
 
   vars:
     grant_sudo: ttest
