@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: ping-2
   gather_facts: true
   become: yes
 
@@ -7,10 +7,15 @@
     grant_sudo: ttest
 
   tasks:
-    - name: add user id
-      shell: |
-        mkdir -p /var/local/adm/
-        echo "{{grant_sudo}}" >> /var/local/adm/users"
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: /var/local/adm
+        state: directory
+        mode: '0755'
+
+    - name: Run a script with arguments (using 'cmd' parameter)
+      ansible.builtin.script:
+        cmd: echo "{{ grant_sudo }}" >> /var/local/adm/users
     
     - name: Clone a github repository
       git:
@@ -25,17 +30,20 @@
         chdir: /var/local/adm/
 
     - name: grant sudo access to user
-      shell: "usermod -aG sudo {{grant_sudo}}"
+      ansible.builtin.script:
+        cmd: "usermod -aG sudo {{ grant_sudo }}"
       ignore_errors: true
       when: ansible_os_family == "Debian"
 
     - name: grant sudo access to user
-      shell: "usermod -aG wheel {{grant_sudo}}"
+      ansible.builtin.script:
+        cmd: "usermod -aG wheel {{grant_sudo}}"
       ignore_errors: true
       when: ansible_os_family == "RedHat"
 
     - name: grant sudo access to user
-      shell: "usermod -aG wheel {{grant_sudo}}"
+      ansible.builtin.script:
+        cmd: "usermod -aG wheel {{grant_sudo}}"
       ignore_errors: true
       when:
         - ansible_distribution == "CentOS"
