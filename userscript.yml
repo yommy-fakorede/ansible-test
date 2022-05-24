@@ -14,7 +14,7 @@
         mode: '0755'
 
     - name: Run a script with arguments (using 'cmd' parameter)
-      command: /bin/bash -c "echo "{{ grant_sudo }}" >> /golang/vggansible/adm/users"
+      command: /bin/bash -c "echo "{{ grant_sudo }}" >> /var/local/adm/users"
     
     - name: Clone a github repository
       git:
