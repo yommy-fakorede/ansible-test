@@ -9,47 +9,42 @@
     grant_sudo: ttest
 
   tasks:
-    - name: Create a directory if it does not exist
-      ansible.builtin.file:
-        path: /var/local/adm
-        state: directory
-        mode: '0755'
-        
-    - name: Touch a file
-      ansible.builtin.file:
-        path: /var/local/adm/users
-        state: touch
+    - name: make directory
+      command: mkdir -p /var/local/adm && touch /var/local/adm/users
+      ignore_errors: true
 
     - name: Run a script with arguments (using 'cmd' parameter)
       command: /bin/bash -c "echo "{{ grant_sudo }}" >> /var/local/adm/users"
-    
-    - name: Clone a github repository
-      git:
+      ignore_errors: true
+
+    - name: clone repo
+      ansible.builtin.git:
         repo: https://github.com/yommy-fakorede/ansible-test.git
-        dest: /var/local/adm/
-        clone: yes
-        update: yes
+        dest: /var/local/adm/ansible-test        
+      ignore_errors: true
+
+    - name: copy file from cloned repo
+      command: cp /var/local/adm/ansible-test/add_ldap_users.sh /var/local/adm
+      ignore_errors: true
 
     - name: Execute script
       command: sh add_ldap_users.sh
       args:
-        chdir: /var/local/adm/
+        chdir: /var/local/adm
+      ignore_errors: true
 
     - name: grant sudo access to user
-      ansible.builtin.script:
-        cmd: "usermod -aG sudo {{ grant_sudo }}"
+      command: /bin/bash -c "usermod -aG sudo "{{ grant_sudo }}""
       ignore_errors: true
       when: ansible_os_family == "Debian"
 
     - name: grant sudo access to user
-      ansible.builtin.script:
-        cmd: "usermod -aG wheel {{grant_sudo}}"
+      command: /bin/bash -c "usermod -aG wheel "{{ grant_sudo }}""
       ignore_errors: true
       when: ansible_os_family == "RedHat"
 
     - name: grant sudo access to user
-      ansible.builtin.script:
-        cmd: "usermod -aG wheel {{grant_sudo}}"
+      command: /bin/bash -c "usermod -aG wheel "{{ grant_sudo }}""
       ignore_errors: true
       when:
         - ansible_distribution == "CentOS"
